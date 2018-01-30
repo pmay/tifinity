@@ -1,4 +1,5 @@
 import math
+from tifinity.scripts.timing import time_usage
 
 ifdtype = {
     1: 1,  # byte      - 1 byte
@@ -436,6 +437,7 @@ class Tiff:
         # return the IFD
         return ifd
 
+    @time_usage
     def readImage(self, ifd):
         self.img_data = b''
         bytes_per_row = ifd.getImageWidth() * ifd.getBytesPerPixel()
@@ -450,18 +452,18 @@ class Tiff:
                 self.img_data += self.tif_file.read(bytes_per_row)
                 bytes_left -= bytes_per_row
 
-    def readImageRows(self, ifd_no):
-        self.row_data = []
-
-        bytes_per_row = self.ifds[ifd_no].imageWidth * int(sum(self.ifds[ifd_no].bps) / 8)
-
-        numStrips = len(self.ifds[ifd_no].stripoffset)
-        for s in range(numStrips):
-            self.tif_file.seek(self.ifds[ifd_no].stripoffset[s])
-
-            # read max number of bytes for range
-            bytes_left = self.ifds[ifd_no].stripbytecount[s]
-
-            while bytes_left > 0:
-                self.row_data += self.tif_file.read(bytes_per_row)
-                bytes_left -= bytes_per_row
+    # def readImageRows(self, ifd_no):
+    #     self.row_data = []
+    #
+    #     bytes_per_row = self.ifds[ifd_no].imageWidth * int(sum(self.ifds[ifd_no].bps) / 8)
+    #
+    #     numStrips = len(self.ifds[ifd_no].stripoffset)
+    #     for s in range(numStrips):
+    #         self.tif_file.seek(self.ifds[ifd_no].stripoffset[s])
+    #
+    #         # read max number of bytes for range
+    #         bytes_left = self.ifds[ifd_no].stripbytecount[s]
+    #
+    #         while bytes_left > 0:
+    #             self.row_data += self.tif_file.read(bytes_per_row)
+    #             bytes_left -= bytes_per_row
