@@ -3,27 +3,12 @@ import math
 from tifinity.scripts.timing import time_usage
 
 ifdtype = {
-    1: 1,  # byte      - 1 byte
-    2: 1,  # ascii     - 1 byte
-    3: 2,  # short     - 2 bytes
-    4: 4,  # long      - 4 bytes
-    5: 8,  # rational  - 8 bytes
-    6: 1,  # sbyte     - 1 byte
-    7: 1,  # undefined - 1 byte
-    8: 2,  # sshort    - 2 bytes
-    9: 4,  # slong     - 4 bytes
-    10: 8,  # srational - 8 bytes
-    11: 4,  # float     - 4 bytes
-    12: 8  # double    - 8 bytes
-}
-
-ifdtype2 = {
     1: (1, "read_bytes", "insert_bytes"),          # byte      - 1 byte
     2: (1, "read_bytes", "insert_bytes"),          # ascii     - 1 byte
     3: (2, "read_shorts", "insert_shorts"),        # short     - 2 bytes
     4: (4, "read_ints", "insert_ints"),            # long      - 4 bytes
     5: (8, "read_rationals", "insert_rationals"),  # rational  - 8 bytes
-    6: (1, "read", "insert"),                      # sbyte     - 1 byte
+    6: (1, "read", "insert_bytes"),                # sbyte     - 1 byte
     7: (1, "read_bytes", "insert_bytes"),          # undefined - 1 byte
     8: (2, "read_shorts", "insert_shorts"),        # sshort    - 2 bytes
     9: (4, "read_ints", "insert_ints"),            # slong     - 4 bytes
@@ -91,7 +76,7 @@ class Directory:
         self.value = value
         self.sot_offset = 0
 
-    def setTagOffset(self, offset):
+    def set_tag_offset(self, offset):
         self.sot_offset = offset  # start of tag offset
 
     def tostring(self):
@@ -108,6 +93,7 @@ class IFD:
         self.directories = {}
         self.nextifd = 0
         self.pointerlocation = 0
+        self.img_data = None
 
     def add_directory(self, directory):
         self.directories[directory.tag] = directory
@@ -124,7 +110,7 @@ class IFD:
     def set_bits_per_sample(self, bps=None):
         if bps is None:
             bps = [8, 8, 8]
-        #bps_bytes = [x.to_bytes(2, byteorder='little') for x in bps]
+        # bps_bytes = [x.to_bytes(2, byteorder='little') for x in bps]
         self.directories[inv_ifdtag["BitsPerSample"]].value = bps
 
     # def getCompression(self):
@@ -136,7 +122,7 @@ class IFD:
     def get_rows_per_strip(self):
         """Returns the number of pixel rows per strip in this IFD's image"""
         # TODO: Default number of rows per strip
-        return self.directories[278].value[0]
+        return self.directories[inv_ifdtag["RowsPerStrip"]].value[0]
 
     def set_rows_per_strip(self, rows):
         self.directories[inv_ifdtag["RowsPerStrip"]].value = rows
@@ -174,7 +160,7 @@ class IFD:
     def get_tag_type_size(self, tag):
         if not isinstance(tag, int):
             tag = inv_ifdtag[tag]
-        return ifdtype2[self.directories[tag].type][0]
+        return ifdtype[self.directories[tag].type][0]
 
     def get_tag_count(self, tag):
         return self.directories[tag].count
@@ -225,8 +211,7 @@ class Tiff:
         self.byteOrder = 'big'
         self.magic = None
         self.ifds = []
-        self.img_data = None
-        self.to_file = None
+        #self.img_data = None
 
         if filename is not None:
             self.tif_file = TiffFileHandler(filename)
@@ -234,7 +219,19 @@ class Tiff:
 
     def load_tiff(self):
         """Loads this TIFF into an internal data structure, ready for maniupulation"""
-        nextifd_offset = self.read_header()
+        # Byte order
+        h = bytes(self.tif_file.read(2))
+        if h != 'II':
+            self.byteOrder = 'little'
+        assert (self.byteOrder == 'little' or self.byteOrder == 'big')
+
+        # Magic number
+        self.magic = self.tif_file.read_int(2)
+        assert (self.magic == 42)
+
+        # IFD offset
+        nextifd_offset = self.tif_file.read_int(4)  # returns offset to first IFD
+
         # read in each IFD and image data
         while nextifd_offset != 0:
             ifd = self.read_ifd(nextifd_offset)
@@ -250,17 +247,16 @@ class Tiff:
         byteo = 'II'
         if self.byteOrder != 'little':
             byteo = 'MM'
-        self.tif_file.insert(byteo.encode())    # byte order
-        self.tif_file.insert_int(42, 2)         # Magic number
-        self.tif_file.insert_int(8, 4)          # first IFD always at 0x08
+        self.tif_file.insert_bytes(list(byteo.encode()))    # byte order
+        self.tif_file.insert_int(42, 2)                     # Magic number
+        self.tif_file.insert_int(8, 4)                      # first IFD always at 0x08
 
         for ifd in self.ifds:
-        #     # self.calculateIFDSpace(ifd)     # Readjusts counts because of changes to image data
+            # self.calculateIFDSpace(ifd)     # Readjusts counts because of changes to image data
             endpos = self.save_ifd(ifd)
             self.save_image(ifd, endpos)
 
         self.tif_file.write(to_file)            # lastly, write to file
-
 
     # # Do this if change stuff having read the TIFF, e.g. migrated the image data. Otherwise
     # # assume all is the same size - even if the offsets have changed.
@@ -268,49 +264,11 @@ class Tiff:
     #     strips_per_image = ifd.get_strips_per_image()
     #     ifd.set_tag_count(inv_ifdtag["StripOffsets"], strips_per_image)
     #     ifd.set_tag_count(inv_ifdtag["StripByteCounts"], strips_per_image)
-    #
-    #
-    #
-    # def _write_value(self, directory, endpos):
-    #     # if count=1 -> value=value; if count>1 -> value=list location
-    #
-    #     if directory.count * ifdtype[directory.type] > 4:
-    #         self._write_int(endpos, 4)  # write the offset of the binary data
-    #         curpos = self.to_file.tell()
-    #         self.to_file.seek(endpos)  # jump to that offset
-    #         # self._writeBytes(bytes(dir.value))
-    #         self._write_bytes(b''.join(directory.value))
-    #         endpos = self.to_file.tell()
-    #         self.to_file.seek(curpos)
-    #     elif ((directory.count > 1) and
-    #           (ifdtype[directory.type] * directory.count == 4)):  # count>1 but still fits in 4 bytes
-    #         self._write_bytes(b''.join(directory.value))  # dir.value = [bytes] so needs joining together
-    #     else:
-    #         self._write_int(directory.value[0], 4)
-    #     return endpos
-
-    def read_header(self):
-        # Byte order
-        h = bytes(self.tif_file.read(2))
-        if h != 'II':
-            self.byteOrder = 'little'
-#        print("ByteOrder: " + self.byteOrder)
-
-        # Magic number
-        self.magic = self.tif_file.read_int(2)
-#        print("Magic: " + str(self.magic))
-        assert (self.magic == 42)
-
-        # IFD offset
-        return self.tif_file.read_int(4)  # returns offset to first IFD
 
     def read_ifd(self, ifd_offset):
         # go through IFD
         ifd = IFD(ifd_offset)
 
-        # self.tif_file.seek(ifd.offset, 0)
-        # ifd.numtags = self._readInt(2)
-        # ifd.numtags = int.from_bytes(self.raw_data[ifd# _offset:ifd_offset+2], byteorder=self.byteOrder)
         self.tif_file.seek(ifd.offset)
         ifd.numtags = self.tif_file.read_int(2)
 
@@ -322,20 +280,19 @@ class Tiff:
 
             value_loc = self.tif_file.tell()   # current location in tiff array
 
-            if count * ifdtype[tag_type] > 4:       # next 4 bytes are a pointer to the value's location
+            if count * ifdtype[tag_type][0] > 4:       # next 4 bytes are a pointer to the value's location
                 value_loc = self.tif_file.read_int(4)
 
-            read_func = getattr(self.tif_file, ifdtype2[tag_type][1])
+            read_func = getattr(self.tif_file, ifdtype[tag_type][1])
 
             value = read_func(count=count, location=value_loc)
             # TODO: Need to handle case where <4 bytes are read
 
-            if count * ifdtype[tag_type] <= 4:
+            if count * ifdtype[tag_type][0] <= 4:
                 self.tif_file.offset(4)
 
             # add directory
             ifd.add_directory(Directory(tag, tag_type, count, value))
-
 
         # finally get the next IFD offset
         ifd.nextifd = self.tif_file.read_int(4)
@@ -351,32 +308,32 @@ class Tiff:
         # first calculate end of IFD offset where directory values can be written
         # end = curpos + (num directories) + (n directories) + offset to nextIFD
         num_bytes = 2 + (ifd.numtags * 12) + 4
-        end_of_ifd = start_of_ifd + num_bytes                       # location after IFD for IFD values
-        self.tif_file.insert(np.zeros((num_bytes,), dtype='uint8')) # write empty IFD
+        end_of_ifd = start_of_ifd + num_bytes                        # location after IFD for IFD values
+        self.tif_file.insert_bytes(np.zeros((num_bytes,), dtype='uint8'))  # write empty IFD
 
         self.tif_file.seek(start_of_ifd)
         self.tif_file.insert_int(ifd.numtags, size=2, overwrite=True)
 
         # assumes sorted tags
         for tag, directory in ifd.directories.items():
-            directory.setTagOffset(self.tif_file.tell())            # set start of tag offset for later
+            directory.set_tag_offset(self.tif_file.tell())            # set start of tag offset for later
             self.tif_file.insert_int(directory.tag, size=2, overwrite=True)
             self.tif_file.insert_int(directory.type, size=2, overwrite=True)
             self.tif_file.insert_int(directory.count, size=4, overwrite=True)
 
-            write_func = getattr(self.tif_file, ifdtype2[directory.type][2])
+            write_func = getattr(self.tif_file, ifdtype[directory.type][2])
 
             overwrite_value = True
             value_loc = self.tif_file.tell()
 
-            if directory.count * ifdtype[directory.type] > 4:       # next 4 bytes are a pointer to the value's location
-                self.tif_file.insert_int(end_of_ifd, size=4, overwrite=True)   # so write the pointer, then jump to location
+            if directory.count * ifdtype[directory.type][0] > 4:       # next 4 bytes are a pointer to the value
+                self.tif_file.insert_int(end_of_ifd, size=4, overwrite=True)   # so write pointer then jump to location
                 value_loc = end_of_ifd
                 overwrite_value = False
 
             num_written = write_func(directory.value, location=value_loc, overwrite=overwrite_value)
 
-            if directory.count * ifdtype[directory.type] > 4:
+            if directory.count * ifdtype[directory.type][0] > 4:
                 end_of_ifd += num_written
             else:
                 self.tif_file.offset(4)             # _offset is not updated if location set in write_func
@@ -386,17 +343,18 @@ class Tiff:
         return end_of_ifd
 
     def read_image(self, ifd):
-        self.img_data = np.array([], dtype='uint8')
+        ifd.img_data = np.array([], dtype='uint8')
         strips = ifd.get_strips()  # [(strip_offset, strip_byte_count)]
         for strip in strips:
-            self.img_data = np.append(self.img_data, self.tif_file.read(size=strip[1], location=strip[0]))
+            ifd.img_data = np.append(ifd.img_data, self.tif_file.read(size=strip[1], location=strip[0]))
 
     def save_image(self, ifd, endpos):
+        """Inserts the specified IFD's image data into the tiff numpy array at the specified end position."""
         # Assumes:
         #  1. StripOffsets has count set appropriately, however values are not set/correct and need updating
         #  2. StripByteCounts has count and values set appropriately.
         #  3. StripOffsets or StripByteCounts count value is correct for the number of strips per image (at least for
-        #     chunky planar configuration (RGBRGBRBG...))
+        #     chunky planar configuration (RGBRGBRGB...))
 
         num_strips = ifd.get_number_strips()
 
@@ -408,15 +366,14 @@ class Tiff:
         start_pos = 0
         for num_bytes in strip_byte_counts:
             strip_offsets.append(self.tif_file.tell())                              # record position of strip start
-            #self.tif_file.insert_ints(self.img_data[start_pos:start_pos + num_bytes])
-            self.tif_file.insert_bytes(self.img_data[start_pos:start_pos + num_bytes])
+            self.tif_file.insert_bytes(ifd.img_data[start_pos:start_pos + num_bytes])
             start_pos += num_bytes
 
         # now set strip offsets in IFD
         strip_offset_tag = inv_ifdtag["StripOffsets"]
         strip_offset_value_location = ifd.get_tag_offset(strip_offset_tag) + 8
 
-        if ifdtype[ifd.get_tag_type(strip_offset_tag)] * num_strips > 4:
+        if ifdtype[ifd.get_tag_type(strip_offset_tag)][0] * num_strips > 4:
             # value to write is larger than 4 bytes, so get the offset for the value array
             strip_offset_value_location = ifd.get_tag_value(strip_offset_tag)
 
@@ -424,62 +381,7 @@ class Tiff:
         tag_type_size = ifd.get_tag_type_size("StripOffsets")
 
         self.tif_file.insert_ints(strip_offsets, tag_type_size, location=strip_offset_value_location, overwrite=True)
-        #self.tif_file.insert(strip_offsets, location=strip_offset_value_location)
 
-
-        # bytes_per_row = ifd.get_image_width() * ifd.get_bytes_per_pixel()
-        # strips_per_image = ifd.get_strips_per_image()
-        # bytes_per_strip = ifd.get_rows_per_strip() * bytes_per_row
-        #
-        # bytes_remaining = len(self.img_data)
-        #
-        # strips = []  # [(strip_offset, strip_byte_count)]
-        #
-        # # Space for strip offset and byte counts
-        # # # First allocate bytes for strip offsets and byte counts based on number of strips
-        # # str_offset_tag = inv_ifdtag["StripOffsets"]
-        # # num_offset_bytes = ifdtype[ifd.get_tag_type(str_offset_tag)] * strips_per_image
-        # # if num_offset_bytes > 4:
-        # #     self.tif_file.insert(np.zeros((num_offset_bytes,), dtype='uint8'), location=endpos)
-        #
-        # self.tif_file.seek(endpos)  # jump to the end for writing image data
-        #
-        # startpos = 0
-        # for s in range(strips_per_image):
-        #     strip_pos = self.tif_file.tell()
-        #
-        #     if bytes_remaining < bytes_per_strip:
-        #         bytes_per_strip = bytes_remaining
-        #
-        #     bytes_written = self.tif_file.insert(self.img_data[startpos:startpos + bytes_per_strip])
-        #     bytes_remaining -= bytes_written
-        #     startpos += bytes_written
-        #     strips.append((strip_pos, bytes_written))
-        #
-        # # now set stripoffset
-        # offsets = [x for (x, y) in strips]  # the actual offsets
-        # bytes_per_strip = [y for (x, y) in strips]  # actual number bytes per strip
-        #
-        # str_offset_tag = inv_ifdtag["StripOffsets"]
-        # self.tif_file.seek(ifd.get_tag_offset(str_offset_tag) + 8)  # jump to directory.value
-        # #if ifdtype[ifd.get_tag_type(str_offset_tag)] * ifd.get_tag_count(str_offset_tag) > 4:
-        # if len(strips) > 1:
-        #     # value to write is larger than 4 bytes, so jump to the offset value array
-        #     self.to_file.seek(ifd.get_tag_value(str_offset_tag))
-        #
-        # # now write the offsets
-        # for o in offsets:
-        #     self._write_int(o, ifd.get_tag_type(str_offset_tag))
-        #
-        # str_bytes_tag = inv_ifdtag["StripByteCounts"]
-        # self.to_file.seek(ifd.get_tag_offset(str_bytes_tag) + 8)  # jump to directory.value
-        # if ifdtype[ifd.get_tag_type(str_bytes_tag)] * ifd.get_tag_count(str_bytes_tag) > 4:
-        #     # value to write is larger than 4 bytes, so jump to the offset value array
-        #     self.to_file.seek(ifd.get_tag_value(str_bytes_tag))
-        #
-        # # now write the offsets
-        # for o in bytes_per_strip:
-        #     self._write_int(o, ifd.get_tag_type(str_bytes_tag))
 
 class TiffFileHandler(object):
     """Handler which imports a TIFF file into a numpy array for reading and/or writing.
@@ -513,22 +415,6 @@ class TiffFileHandler(object):
             if location is None:
                 self._offset += size
             return b
-
-    def insert(self, bytes_to_write, location=None, overwrite=False):
-        """Inserts or overwrites the specified bytes at the specified location, or the current offset if no location is supplied."""
-        num_bytes = len(bytes_to_write)
-
-        off = self._offset
-        if location is not None:
-            off = location
-        if overwrite:
-            self._tiff[off:off + num_bytes] = bytes_to_write
-        else:
-            self._tiff = np.insert(self._tiff, off, list(bytes_to_write))
-        if location is None:
-            self._offset += num_bytes
-
-        return num_bytes
 
     def read_bytes(self, count=1, location=None):
         """Reads 'count' bytes from the specified location, or the current offset if no location is supplied."""
@@ -599,26 +485,11 @@ class TiffFileHandler(object):
         """Inserts the specified number encoded in size bytes into the tiff array at the specified location.
            If overwrite is True, the bytes overwrite those at the write location; if False, the bytes are
            inserted at the write location"""
-        flatten = lambda l: [x for sublist in l for x in sublist]
-        tobytes = lambda x: list(x.to_bytes(size, byteorder=self._byteorder))
+        def flatten(l): return [x for sublist in l for x in sublist]
+        def tobytes(x): return list(x.to_bytes(size, byteorder=self._byteorder))
 
         bytes_to_write = flatten([tobytes(x) for x in numbers])
         return self.insert_bytes(bytes_to_write, location, overwrite)
-
-    def _insert_bytes(self, bytes_to_write, location=None, overwrite=False):
-        num_bytes = len(bytes_to_write)
-
-        off = self._offset
-        if location is not None:
-            off = location
-        if overwrite:
-            self._tiff[off:off + num_bytes] = bytes_to_write
-        else:
-            self._tiff = np.insert(self._tiff, off, bytes_to_write)
-        if location is None:
-            self._offset += num_bytes
-
-        return num_bytes
 
     def read_rationals(self, count=1, location=None):
         """Reads in a TIFF Rational data type (2 4-byte integers)"""
@@ -639,8 +510,8 @@ class TiffFileHandler(object):
     def insert_rationals(self, values, location=None, overwrite=False):
         """Inserts or overwrites the specified rational values at the specified location, or the current offset
            if no location is specified."""
-        flatten = lambda l: [x for sublist in l for x in sublist]
-        tobytes = lambda x: list(x.to_bytes(4, byteorder=self._byteorder))
+        def flatten(l): return [x for sublist in l for x in sublist]
+        def tobytes(x): return list(x.to_bytes(4, byteorder=self._byteorder))
 
         bytes_to_write = flatten([tobytes(n) + tobytes(d) for (n, d) in values])
         num_bytes = len(bytes_to_write)
