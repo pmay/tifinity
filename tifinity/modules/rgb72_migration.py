@@ -4,15 +4,16 @@ Such TIFFs typically occur through being saved as 24 bit TIFFs in Photoshop.
 """
 import os
 
+from tifinity.modules import BaseModule
+
 from tifinity.parser.tiff import Tiff
 from tifinity.actions.rgb72_to_rgb96 import rgb72_to_rgb96
 from tifinity.scripts.timing import *
 
 
-class migrate_rgb72():
+class migrate_rgb72(BaseModule):
     def __init__(self):
         self.cli_name = 'migrate_rgb72'
-        self.cli_args = [{'name': "path", 'nargs':"+", 'help':"the TIFF file or folder(s) containing TIFFs to migrate."}]
         self.rgb72migrate = rgb72_to_rgb96()
 
     def add_subparser(self, mainparser):
