@@ -16,7 +16,7 @@ def load_modules():
         #     continue
         if i == '__init__.py':
             continue
-        print("Loading Module: "+i[:-3])
+        #print("Loading Module: "+i[:-3])
         modules.append(importlib.import_module('.'+i[:-3], package='tifinity.modules'))
     return modules
 
