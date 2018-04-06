@@ -12,11 +12,8 @@ def load_modules():
     modules = []
     possiblemodules = next(os.walk(moduledir))[2]   # os.walk returns (dirpath, dirnames, filenames)
     for i in possiblemodules:
-        # if i == '__pycache__':
-        #     continue
         if i == '__init__.py':
             continue
-        #print("Loading Module: "+i[:-3])
         modules.append(importlib.import_module('.'+i[:-3], package='tifinity.modules'))
     return modules
 

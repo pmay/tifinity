@@ -11,7 +11,7 @@ from tifinity.actions.rgb72_to_rgb96 import rgb72_to_rgb96
 from tifinity.scripts.timing import *
 
 
-class migrate_rgb72(BaseModule):
+class MigrateRGB72(BaseModule):
     def __init__(self):
         self.cli_name = 'migrate_rgb72'
         self.rgb72migrate = rgb72_to_rgb96()
@@ -44,4 +44,4 @@ class migrate_rgb72(BaseModule):
         tiff.save_tiff(to_file)
 
 
-module = migrate_rgb72()  # initiate module class when module imported
+module = MigrateRGB72()  # initiate module class when module imported
