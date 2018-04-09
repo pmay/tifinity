@@ -18,7 +18,11 @@ class rgb72_to_rgb96():
         # TODO: Check if tiff is a 72bpc image first
 
         for ifd in tiff.ifds:
-            rgbpixels = as_strided(ifd.img_data.view(np.int32), strides=(9, 3,), shape=(1, int(ifd.img_data.shape[0] / 3)))
+            # need to limit striding to complete pixel ranges during conversion.
+            completerange = ifd.img_data.shape[0] - ifd.img_data.shape[0]%12
+            raw = ifd.img_data[:completerange]
+            
+            rgbpixels = as_strided(raw.view(np.int32), strides=(9, 3,), shape=(1, int(raw.shape[0] / 3)))
             rgb = rgbpixels & 0x00ffffff
 
             rgb32 = self._vconv(rgb[0])

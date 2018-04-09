@@ -9,6 +9,9 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 Added
 ~~~~~
-* Initial version of code with RGB 72bpi TIFF migration utility
+* Initial version of code
+* Added new modules:
+** RGB 72bpi TIFF migration utility
+** TIFF IFD console display utility
 * Pip packaging
 * Readme and Changelog
