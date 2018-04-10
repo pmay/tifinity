@@ -46,7 +46,7 @@ class MigrateRGB72(BaseModule):
                 print("\t\tDone")
                 tiff.save_tiff(to_file)
             else:
-                print("\t\tNot migrated")
+                print("\t\tNot migrated (No need)")
         except InvalidTiffError:
             print("\t\tNot migrated (Invalid TIFF/Not a TIFF)")
 

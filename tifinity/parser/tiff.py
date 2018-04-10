@@ -169,6 +169,10 @@ class IFD:
     def set_tag_count(self, tag, count):
         self.directories[tag].count = count
 
+    def get_tag_value_by_name(self, tagname):
+        """Returns a tag's value from the IFD, accessed via the tag name itself."""
+        return self.directories[inv_ifdtag[tagname]].value
+
     def get_tag_value(self, tag):
         return self.directories[tag].value
 

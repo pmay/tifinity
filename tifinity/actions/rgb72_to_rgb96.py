@@ -15,13 +15,17 @@ class rgb72_to_rgb96():
 
     def migrate(self, tiff):
         """Converts a 24 bit per channel pixel to a 32 bit per channel floating point value."""
-        # TODO: Check if tiff is a 72bpc image first
-        # TODO: Check that image is RGB
-
         migrated = False
+
         for ifd in tiff.ifds:
+            pi = ifd.get_tag_value_by_name("PhotometricInterpretation")[0]
+            if pi != 2:
+                # not RGB
+                continue
+
             bps = ifd.get_bits_per_sample()
             if bps != [24, 24, 24]:
+                # not 3x 24bit RGB channels
                 continue
 
             # need to limit striding to complete pixel ranges during conversion.
