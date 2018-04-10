@@ -7,6 +7,7 @@ import os
 from tifinity.modules import BaseModule
 
 from tifinity.parser.tiff import Tiff
+from tifinity.parser.errors import InvalidTiffError
 from tifinity.actions.rgb72_to_rgb96 import rgb72_to_rgb96
 from tifinity.scripts.timing import *
 
@@ -31,17 +32,23 @@ class MigrateRGB72(BaseModule):
             for file in files:
                 self.__migrate_tiff(file, file + ".conv.tif")
 
-    @time_usage
     def __migrate_tiff(self, fromfile, to_file):
-        print("Migrating " + fromfile)
+        print("Migrating " + fromfile, end='')
 
-        tiff = Tiff(fromfile)
+        try:
+            tiff = Tiff(fromfile)
 
-        # Convert image data
-        self.rgb72migrate.migrate(tiff)
+            # Convert image data
+            migrated = self.rgb72migrate.migrate(tiff)
 
-        # Write new TIFF
-        tiff.save_tiff(to_file)
+            # Write new TIFF if at least one sub-image has been migrated
+            if migrated:
+                print("\t\tDone")
+                tiff.save_tiff(to_file)
+            else:
+                print("\t\tNot migrated")
+        except InvalidTiffError:
+            print("\t\tNot migrated (Invalid TIFF/Not a TIFF)")
 
 
 module = MigrateRGB72()  # initiate module class when module imported

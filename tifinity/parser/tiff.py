@@ -1,6 +1,7 @@
 import numpy as np
 import math
-from tifinity.scripts.timing import time_usage
+
+from tifinity.parser.errors import InvalidTiffError
 
 ifdtype = {
     1: (1, "read_bytes", "insert_bytes"),          # byte      - 1 byte
@@ -219,15 +220,18 @@ class Tiff:
 
     def load_tiff(self):
         """Loads this TIFF into an internal data structure, ready for maniupulation"""
-        # Byte order
-        h = bytes(self.tif_file.read(2))
-        if h != 'II':
-            self.byteOrder = 'little'
-        assert (self.byteOrder == 'little' or self.byteOrder == 'big')
 
-        # Magic number
-        self.magic = self.tif_file.read_int(2)
-        assert (self.magic == 42)
+        try:
+            # Byte order
+            h = bytes(self.tif_file.read(2))
+            self.byteOrder = {b'II': 'little', b'MM': 'big'}[h]
+            assert (self.byteOrder == 'little' or self.byteOrder == 'big')
+
+            # Magic number
+            self.magic = self.tif_file.read_int(2)
+            assert (self.magic == 42)
+        except (KeyError, AssertionError):
+            raise InvalidTiffError("Incorrect header")
 
         # IFD offset
         nextifd_offset = self.tif_file.read_int(4)  # returns offset to first IFD
@@ -396,7 +400,7 @@ class TiffFileHandler(object):
 
     def set_byte_order(self, byteorder='little'):
         """Sets the byte order to be used for subsequent reads"""
-        self._offset = byteorder
+        self._byteorder = byteorder
 
     def clear(self):
         """Empties the current numpy array for this Tiff"""
