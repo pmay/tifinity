@@ -6,12 +6,12 @@ from tifinity.parser.tiff import Tiff
 
 class TiffDetails(BaseModule):
     def __init__(self):
-        self.cli_name = 'detail_tiff'
+        self.cli_name = 'show_tags'
 
     def add_subparser(self, mainparser):
         m_parser = mainparser.add_parser(self.cli_name)
         m_parser.set_defaults(func=self.process_cli)
-        m_parser.add_argument("file", help="the TIFF file to detail")
+        m_parser.add_argument("file", help="the TIFF file whose tags to show")
 
     def process_cli(self, args):
         tiff = Tiff(args.file)

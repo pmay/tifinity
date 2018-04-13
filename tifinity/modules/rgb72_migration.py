@@ -9,7 +9,6 @@ from tifinity.modules import BaseModule
 from tifinity.parser.tiff import Tiff
 from tifinity.parser.errors import InvalidTiffError
 from tifinity.actions.rgb72_to_rgb96 import rgb72_to_rgb96
-from tifinity.scripts.timing import *
 
 
 class MigrateRGB72(BaseModule):
@@ -21,19 +20,25 @@ class MigrateRGB72(BaseModule):
         m_parser = mainparser.add_parser(self.cli_name)
         m_parser.set_defaults(func=self.process_cli)
         m_parser.add_argument("path", nargs="+", help="the TIFF file or folder(s) containing TIFFs to migrate.")
+        m_parser.add_argument("-o", dest="output", help="the output folder to output the converted TIFF(s) to.")
 
     def process_cli(self, args):
         for path in args.path:
             files = [path]                          # assume path=file to start with
 
             if os.path.isdir(path):
-                files = [x.path for x in os.scandir(path)]
+                files = [x.path for x in os.scandir(path) if x.is_file()]
 
             for file in files:
-                self.__migrate_tiff(file, file + ".conv.tif")
+                (out_path, filename) = os.path.split(file)
+
+                if args.output:
+                    out_path = args.output
+
+                self.__migrate_tiff(file, os.path.join(out_path, filename + ".conv.tif"))
 
     def __migrate_tiff(self, fromfile, to_file):
-        print("Migrating " + fromfile, end='')
+        print("Migrating " + fromfile, end='', flush=True)
 
         try:
             tiff = Tiff(fromfile)

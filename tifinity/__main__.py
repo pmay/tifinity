@@ -28,23 +28,25 @@ def main(args=None):
     ap = argparse.ArgumentParser(prog="Tifinity",
                                  description="Helpful TIFF analysis and action tools")
 
-    moduleparsers = ap.add_subparsers(title='Modules',
-                                     description='Valid modules',
-                                     dest='module')
+    moduleparsers = ap.add_subparsers(title='Available Modules', dest='module')
 
     # Set up each module
     for module in modules:
         m = module.module               # initiate the module
         m.add_subparser(moduleparsers)  # add sub-parser to this argparse handler
 
-    #ap.add_argument("-o", dest="output",
-    #                help="CSV file to output statistics too")
-    #ap.add_argument("-s", "--silent", dest="silent", action="store_true",
+    # ap.add_argument("-s", "--silent", dest="silent", action="store_true",
     #                help="turn off command line output")
     ap.add_argument("-v", "--version", action="version", version='%(prog)s v' + __version__,
                     help="display program version")
     arguments = ap.parse_args()
-    arguments.func(arguments)
 
-if __name__=='__main__':
+    # Now try to call the appropriate sub-parser handling function, or print the help if not
+    try:
+        arguments.func(arguments)
+    except AttributeError:
+        ap.print_help()
+
+
+if __name__ == '__main__':
     main()

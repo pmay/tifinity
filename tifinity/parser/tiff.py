@@ -222,6 +222,10 @@ class Tiff:
             self.tif_file = TiffFileHandler(filename)
             self.load_tiff()
 
+    def raw_data(self):
+        """Returns the numpy array for the entire file"""
+        return self.tif_file.raw_data()
+
     def load_tiff(self):
         """Loads this TIFF into an internal data structure, ready for maniupulation"""
 
@@ -351,6 +355,7 @@ class Tiff:
         return end_of_ifd
 
     def read_image(self, ifd):
+        """Reads the full image data for the specified IFD into a numpy array"""
         ifd.img_data = np.array([], dtype='uint8')
         strips = ifd.get_strips()  # [(strip_offset, strip_byte_count)]
         for strip in strips:
@@ -401,6 +406,9 @@ class TiffFileHandler(object):
 
         with open(filename, 'rb') as in_file:
             self._tiff = np.fromfile(in_file, dtype="uint8")
+
+    def raw_data(self):
+        return self._tiff
 
     def set_byte_order(self, byteorder='little'):
         """Sets the byte order to be used for subsequent reads"""

@@ -13,5 +13,6 @@ Added
 * Added new modules:
 ** RGB 72bpi TIFF migration utility
 ** TIFF IFD console display utility
+** Checksum (full and image data) calculation utility
 * Pip packaging
 * Readme and Changelog
