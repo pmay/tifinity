@@ -8,6 +8,7 @@ from tifinity.scripts.timing import time_usage
 
 
 class ImageFixity(BaseModule):
+    """ Module to perform fixity checks on TIFF files. """
     def __init__(self):
         self.cli_name = 'checksum'
         self.hashes = {}
@@ -32,17 +33,20 @@ class ImageFixity(BaseModule):
             ifd_hashes.append(self._hash_data(ifd.img_data, alg))
         self.hashes["ifd"] = ifd_hashes
 
-        self.format_output(args.json)
+        output = self.format_output(args.json)
+        print(output)
+        return output
 
     def format_output(self, jsonout=False):
         if jsonout:
-            print(json.dumps(self.hashes))
+            return json.dumps(self.hashes)
         else:
-            print("Full File:\t{digest}".format(digest=self.hashes["full"]))
+            out = "Full File:\t{digest}\n".format(digest=self.hashes["full"])
             count = 0
             for x in self.hashes["ifd"]:
-                print("Image [{id}]:\t{digest}".format(id=count, digest=x))
+                out += "Image [{id}]:\t{digest}\n".format(id=count, digest=x)
                 count+=1
+            return out
 
     @staticmethod
     def _hash_data(data, alg="sha256"):

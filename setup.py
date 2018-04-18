@@ -39,7 +39,7 @@ def find_version(*file_paths):
 setup(
     name='tifinity',
     version=find_version('tifinity', '__init__.py'),
-    packages=find_packages(),  #['tifinity'],
+    packages=find_packages(),
     url='https://github.com/pmay/tifinity',
     license='Apache Licence 2.0',
     author='Peter May',
@@ -50,9 +50,9 @@ setup(
             'tifinity = tifinity.__main__:main'
         ]
     },
-#     install_requires=[
-#        "progressbar2>=3.6.2"
-#     ],
+    install_requires=[
+        'numpy>=1.13.3'
+    ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
 

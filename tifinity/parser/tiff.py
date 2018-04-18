@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from struct import unpack_from
 
 from tifinity.parser.errors import InvalidTiffError
 
@@ -462,12 +463,51 @@ class TiffFileHandler(object):
         return num_bytes
 
     def read_floats(self, count=1, location=None):
-        # TODO: read_float
-        pass
+        """Reads the next 'count' lots of 4 bytes at the specified location, or the current offset if no location is supplied,
+            and interprets these bytes as a IEEE 754 float.
+
+            If location is specified, this read will not update the current offset"""
+        return_vals = []
+        byteorder = {'little':'<f', 'big':'>f'}[self._byteorder]
+        if self._tiff is not None:
+            off = self._offset
+            if location is not None:
+                off = location
+            for c in range(count):
+                return_vals.append(unpack_from(byteorder, self._tiff[off:off+4])[0])
+                off += 4# size
+            if location is None:
+                self._offset += (count * 4) #size)
+            return return_vals
 
     def read_doubles(self, count=1, location=None):
-        # TODO: read_double
+        """Reads the next 'count' lots of 8 bytes at the specified location, or the current offset if no location is supplied,
+            and interprets these bytes as a IEEE 754 double.
+
+            If location is specified, this read will not update the current offset"""
+        return_vals = []
+        byteorder = {'little': '<d', 'big': '>d'}[self._byteorder]
+        if self._tiff is not None:
+            off = self._offset
+            if location is not None:
+                off = location
+            for c in range(count):
+                return_vals.append(unpack_from(byteorder, self._tiff[off:off + 8])[0])
+                off += 8  # size
+            if location is None:
+                self._offset += (count * 8)  # size)
+            return return_vals
+
+    def insert_floats(self, numbers, location=None, overwrite=False):
+        """Inserts the specified IEEE 754 floats into the tiff array at the specified location.
+           If overwrite is True, the bytes overwrite those at the write location; if False, the bytes are
+           inserted at the write location"""
         pass
+        # def flatten(l): return [x for sublist in l for x in sublist]
+        # def tobytes(x): return list(x.to_bytes(size, byteorder=self._byteorder))
+        #
+        # bytes_to_write = flatten([tobytes(x) for x in numbers])
+        # return self.insert_bytes(bytes_to_write, location, overwrite)
 
     def read_int(self, size=4, location=None):
         """Reads a single int of 'size' bytes at the specified location, or the current offset if no location is

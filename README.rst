@@ -13,8 +13,8 @@ Installation
 
     pip install tifinity
 
-Documentation
-=============
+How to use
+==========
 
 Base usage: ``tifinity [-h] [-v] {module} [module-options]``
 
@@ -23,7 +23,6 @@ module selection:
 
 optional arguments:
   -h, --help        Show the help message and exit
-  #-s, --silent      Turn off command line output [TODO]
   -v, --version     Provide the version of this application
 
 Tifinity is a framework encompassing a TIFF parser and a number of processing modules. Modules operate on TIFF files to
@@ -69,7 +68,7 @@ checksum
 ^^^^^^^^
 Calculates checksum values for the image data in each sub-image of the specified TIFF, as well as the full file.
 
-Usage: ``tifinity cs_image [-h] [-a {md5,sha256,sha512,sha3_256,sha3_512}] [--json] file``
+Usage: ``tifinity checksum [-h] [-a {md5,sha256,sha512,sha3_256,sha3_512}] [--json] file``
 
 positional arguments:
   file              the TIFF file to generate checksum values for
