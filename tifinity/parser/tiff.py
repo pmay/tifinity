@@ -96,6 +96,7 @@ class IFD:
         self.nextifd = 0
         self.pointerlocation = 0
         self.img_data = None
+        self.ifd_data = None
 
     def add_directory(self, directory):
         self.directories[directory.tag] = directory
@@ -217,7 +218,6 @@ class Tiff:
         self.byteOrder = 'big'
         self.magic = None
         self.ifds = []
-        #self.img_data = None
 
         if filename is not None:
             self.tif_file = TiffFileHandler(filename)
@@ -284,6 +284,9 @@ class Tiff:
 
         self.tif_file.seek(ifd.offset)
         ifd.numtags = self.tif_file.read_int(2)
+
+        # save the raw data in the IFD
+        ifd.ifd_data = self.tif_file.read(size=(2+(ifd.numtags*12)+4), location=ifd_offset)
 
         for i in range(ifd.numtags):
             # read IFD bytes

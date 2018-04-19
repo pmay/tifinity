@@ -28,10 +28,13 @@ class ImageFixity(BaseModule):
 
         self.hashes["full"] = self._hash_data(tiff.raw_data(), alg)
 
+        image_hashes = []
         ifd_hashes = []
         for ifd in tiff.ifds:
-            ifd_hashes.append(self._hash_data(ifd.img_data, alg))
-        self.hashes["ifd"] = ifd_hashes
+            image_hashes.append(self._hash_data(ifd.img_data, alg))
+            ifd_hashes.append(self._hash_data(ifd.ifd_data, alg))
+        self.hashes["images"] = image_hashes
+        self.hashes["ifds"] = ifd_hashes
 
         output = self.format_output(args.json)
         print(output)
@@ -43,7 +46,7 @@ class ImageFixity(BaseModule):
         else:
             out = "Full File:\t{digest}\n".format(digest=self.hashes["full"])
             count = 0
-            for x in self.hashes["ifd"]:
+            for x in self.hashes["images"]:
                 out += "Image [{id}]:\t{digest}\n".format(id=count, digest=x)
                 count+=1
             return out

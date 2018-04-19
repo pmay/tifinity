@@ -16,11 +16,13 @@ class TestModuleChecksumImage(unittest.TestCase):
     *  6) Image MD5 check for compressed single strip TIFF
     *  7) Image MD5 check for single strip bilevel TIFF
     *  8) Image MD5 check for two subfile single strip TIFF
-    *  9) Check MD5 for non-image data for single strip TIFF.
-    *  10) Check MD5 for non-image data for a two strip TIFF.
-    *  11) Image MD5 check for single strip TIFF with exif metadata.
-    *  12) IFD MD5 single strip Tiff
-    *  13) IFD MD5 of two subfile
+    *  9) Image MD5 check for single strip TIFF with exif metadata.
+    *  10) IFD MD5 single strip Tiff
+    *  11) IFD MD5 of two subfile
+
+    Todo: Other tests
+    *  Check MD5 for non-image data for single strip TIFF
+    *  Check MD5 for non-image data for a two strip TIFF
     """
 
     def _evaluate_checksums(self, res_path):
@@ -34,7 +36,8 @@ class TestModuleChecksumImage(unittest.TestCase):
 
         # check the checksums are correct
         self.assertEqual(output_js["full"], gt_js["md5"]["full"])
-        self.assertEqual(output_js["ifd"], gt_js["md5"]["images"])
+        self.assertEqual(output_js["images"], gt_js["md5"]["images"])
+        self.assertEqual(output_js["ifds"], gt_js["md5"]["ifds"])
 
     def test_single_strip_checksums(self):
         """Tests that the full TIFF file's checksum and those for the sub-image is correct for a single strip image"""
@@ -91,7 +94,9 @@ class TestModuleChecksumImage(unittest.TestCase):
         """ Tests the checksums for a TIFF file containing two single-strip images. """
         self._evaluate_checksums("t_two_subfiles_one_strip")
 
-
+    def test_single_strip_with_exif_checksum(self):
+        """ Tests the checksums for a single strip TIFF file with exif metadata. """
+        self._evaluate_checksums("t_one_strip_with_exif")
 
 if __name__ == '__main__':
     unittest.main()
