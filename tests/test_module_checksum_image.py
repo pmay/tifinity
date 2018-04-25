@@ -8,17 +8,15 @@ class TestModuleChecksumImage(unittest.TestCase):
     """Tests relating to checksum_image module
 
     Tests:
-    *  1) File and Image MD5 checks for single strip TIFF
-    *  2) Image MD5 check for sequential 2-strip TIFF with strips referenced in sequential order
-    *  3) Image MD5 check for sequential 2-strip TIFF with strips referenced in reverse order
-    *  4) Image MD5 check for non-sequential 2-strip TIFF with strips referenced in sequential order
-    *  5) Image MD5 check for non-sequential 2-strip TIFF with strips referenced in reverse order
-    *  6) Image MD5 check for compressed single strip TIFF
-    *  7) Image MD5 check for single strip bilevel TIFF
-    *  8) Image MD5 check for two subfile single strip TIFF
-    *  9) Image MD5 check for single strip TIFF with exif metadata.
-    *  10) IFD MD5 single strip Tiff
-    *  11) IFD MD5 of two subfile
+    *  1) File, Image and IFD MD5 checks for single strip TIFF
+    *  2) File, Image and IFD MD5 check for sequential 2-strip TIFF with strips referenced in sequential order
+    *  3) File, Image and IFD MD5 check for sequential 2-strip TIFF with strips referenced in reverse order
+    *  4) File, Image and IFD MD5 check for non-sequential 2-strip TIFF with strips referenced in sequential order
+    *  5) File, Image and IFD MD5 check for non-sequential 2-strip TIFF with strips referenced in reverse order
+    *  6) File, Image and IFD MD5 check for compressed single strip TIFF
+    *  7) File, Image and IFD MD5 check for single strip bilevel TIFF
+    *  8) File, Image and IFD MD5 check for two subfile single strip TIFF
+    *  9) File, Image and IFD MD5 check for single strip TIFF with exif metadata.
 
     Todo: Other tests
     *  Check MD5 for non-image data for single strip TIFF

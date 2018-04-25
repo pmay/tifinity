@@ -19,7 +19,7 @@ class ImageFixity(BaseModule):
         m_parser.add_argument("-a", "--alg", dest="algorithm", choices=['md5', 'sha256', 'sha512', 'sha3_256', 'sha3_512'],
                               default='sha256', help="the hashing algorithm to use")
         m_parser.add_argument("--json", dest="json", action="store_true", help="output in json format")
-        m_parser.add_argument("file", help="the TIFF file whose tags to show")
+        m_parser.add_argument("file", help="the TIFF file to generate checksum values for")
 
     # @time_usage
     def process_cli(self, args):
