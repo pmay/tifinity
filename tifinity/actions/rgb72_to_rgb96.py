@@ -18,11 +18,13 @@ class rgb72_to_rgb96():
         migrated = False
 
         for ifd in tiff.ifds:
+            # Check that the file is an RGB one
             pi = ifd.get_tag_value_by_name("PhotometricInterpretation")[0]
             if pi != 2:
                 # not RGB
                 continue
 
+            # Check that the file is encoded as 24 bits per colour channel
             bps = ifd.get_bits_per_sample()
             if bps != [24, 24, 24]:
                 # not 3x 24bit RGB channels

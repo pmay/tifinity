@@ -10,6 +10,9 @@ from tifinity.parser.tiff import Tiff
 from tifinity.parser.errors import InvalidTiffError
 from tifinity.actions.rgb72_to_rgb96 import rgb72_to_rgb96
 
+# Module version
+__version__ = '0.1.0'
+
 
 class MigrateRGB72(BaseModule):
     def __init__(self):
