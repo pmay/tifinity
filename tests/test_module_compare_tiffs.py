@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 from argparse import Namespace
@@ -26,10 +27,11 @@ class TestModuleCompareTiffs(unittest.TestCase):
         res_path = "t_one_strip"
         path = os.path.join("./resources", res_path)
         file = os.path.join(path, res_path + ".tiff")
-        args = Namespace(tiff1=file, tiff2=file, metric="checksum")
+        args = Namespace(tiff1=file, tiff2=file, metric="checksum", json=True, imageonly=False)
         output = compare_tiffs.module.process_cli(args)
 
-        self.assertEqual({'Files Identical': True}, output)
+        self.assertEqual(json.dumps({"Files Identical": True,
+                                     "Images Identical": {0: [True]}}), output)
 
     def test_different_files(self):
         """ Tests that different TIFFs return correct output """
@@ -41,11 +43,11 @@ class TestModuleCompareTiffs(unittest.TestCase):
         comp_path = os.path.join("./resources", comp_res_path)
         comp_file = os.path.join(comp_path, comp_res_path + ".tiff")
 
-        args = Namespace(tiff1=orig_file, tiff2=comp_file, metric="checksum")
+        args = Namespace(tiff1=orig_file, tiff2=comp_file, metric="checksum", json=True, imageonly=False)
         output = compare_tiffs.module.process_cli(args)
 
-        self.assertEqual({'Files Identical': False,
-                          'Images Identical': {0: [False]}}, output)
+        self.assertEqual(json.dumps({'Files Identical': False,
+                                    'Images Identical': {0: [False]}}), output)
 
 if __name__ == '__main__':
     unittest.main()
