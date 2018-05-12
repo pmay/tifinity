@@ -296,16 +296,28 @@ class Tiff:
 
             value_loc = self.tif_file.tell()   # current location in tiff array
 
-            if count * ifdtype[tag_type][0] > 4:       # next 4 bytes are a pointer to the value's location
-                value_loc = self.tif_file.read_int(4)
+            # TIFF v6 spec, pg 16:
+            # "Warning: It is possible that other TIFF field types will be added in the future.
+            #  Readers should skip over fields containing an unexpected field type."
+            ifdtype_tuple = ifdtype.get(tag_type)
 
-            read_func = getattr(self.tif_file, ifdtype[tag_type][1])
+            if ifdtype_tuple is not None:
+                # found a tag type within TIFF v6 specified ranges
+                if count * ifdtype_tuple[0] > 4:       # next 4 bytes are a pointer to the value's location
+                    value_loc = self.tif_file.read_int(4)
 
-            value = read_func(count=count, location=value_loc)
-            # TODO: Need to handle case where <4 bytes are read
+                read_func = getattr(self.tif_file, ifdtype_tuple[1])
 
-            if count * ifdtype[tag_type][0] <= 4:
+                value = read_func(count=count, location=value_loc)
+                # TODO: Need to handle case where <4 bytes are read
+
+                if count * ifdtype_tuple[0] <= 4:
+                    self.tif_file.offset(4)
+            else:
+                # tag type outside TIFF v6 specified ranges
+                # skip next 4 bytes and set value to "Unknown tag type; value unknown"
                 self.tif_file.offset(4)
+                value = "Unknown tag type; value unknown"
 
             # add directory
             ifd.add_directory(Directory(tag, tag_type, count, value))

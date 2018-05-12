@@ -12,6 +12,7 @@ Added
 * Unit tests for Checksum module
 * Test resources (hand crafted example TIFF files)
 * read_float and read_double methods in TIFF parser
+* Module to compare two tiffs (currently only via MD5 checksum)
 
 Changed
 ~~~~~~~
