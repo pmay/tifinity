@@ -7,14 +7,8 @@ class CompareTiffs(BaseModule):
     """ Module comparing the similarity of two TIFF files.
         By default this compares the MD5 checksums of the pixel image data. """
 
-    ModuleReturnCodes = {
-        "Identical": 0,
-        "Different": 1,
-        "NotEnoughFiles": 2}
-
     def __init__(self):
         self.cli_name = 'compare'
-        self.returnValues = {}
 
     def add_subparser(self, mainparser):
         m_parser = mainparser.add_parser(self.cli_name)
@@ -23,16 +17,20 @@ class CompareTiffs(BaseModule):
         m_parser.add_argument("tiff2", help="the comparison TIFF file")
 
     def process_cli(self, args):
-        print(args.files)
-        if len(args.files) < 2:
-            print("More than one file is required for comparison")
-            return self.ModuleReturnCodes["NotEnoughFiles"]
+        # if args.tiff1 is None or args.tiff2 is None:
+        #     print("Two files are required for comparison")
+        #     return self.ModuleReturnCodes["NotEnoughFiles"]
 
-        # Load TIFFs
-        tiffs = [Tiff(f) for f in args.files]
+        try:
+            # Load TIFFs
+            tiffs = [Tiff(args.tiff1), Tiff(args.tiff2)]
+        except AttributeError:
+            raise
 
         # calculate checksums
         checksums = [Checksum.checksum(t) for t in tiffs]
+
+        self.returnValues = {}
 
         # identical files?
         if checksums[0]["full"]==checksums[1]["full"]:
