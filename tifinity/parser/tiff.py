@@ -239,6 +239,7 @@ class Tiff:
             h = bytes(self.tif_file.read(2))
             self.byteOrder = {b'II': 'little', b'MM': 'big'}[h]
             assert (self.byteOrder == 'little' or self.byteOrder == 'big')
+            self.tif_file.set_byte_order(self.byteOrder)
 
             # Magic number
             self.magic = self.tif_file.read_int(2)

@@ -8,15 +8,16 @@ class TestModuleChecksumImage(unittest.TestCase):
     """Tests relating to checksum_image module
 
     Tests:
-    *  1) File, Image and IFD MD5 checks for single strip TIFF
-    *  2) File, Image and IFD MD5 check for sequential 2-strip TIFF with strips referenced in sequential order
-    *  3) File, Image and IFD MD5 check for sequential 2-strip TIFF with strips referenced in reverse order
-    *  4) File, Image and IFD MD5 check for non-sequential 2-strip TIFF with strips referenced in sequential order
-    *  5) File, Image and IFD MD5 check for non-sequential 2-strip TIFF with strips referenced in reverse order
-    *  6) File, Image and IFD MD5 check for compressed single strip TIFF
-    *  7) File, Image and IFD MD5 check for single strip bilevel TIFF
-    *  8) File, Image and IFD MD5 check for two subfile single strip TIFF
-    *  9) File, Image and IFD MD5 check for single strip TIFF with exif metadata.
+    *  1) File, Image and IFD MD5 check for single strip little-endian (LE) TIFF
+    *  2) File, Image and IFD MD5 check for sequential 2-strip LE TIFF with strips referenced in sequential order
+    *  3) File, Image and IFD MD5 check for sequential 2-strip LE TIFF with strips referenced in reverse order
+    *  4) File, Image and IFD MD5 check for non-sequential 2-strip LE TIFF with strips referenced in sequential order
+    *  5) File, Image and IFD MD5 check for non-sequential 2-strip LE TIFF with strips referenced in reverse order
+    *  6) File, Image and IFD MD5 check for compressed single strip LE TIFF
+    *  7) File, Image and IFD MD5 check for single strip bilevel LE TIFF
+    *  8) File, Image and IFD MD5 check for two subfile single strip LE TIFF
+    *  9) File, Image and IFD MD5 check for single strip LE TIFF with exif metadata.
+    * 10) File, Image and IFD MD5 check for single strip big-endian TIFF
 
     Todo: Other tests
     *  Check MD5 for non-image data for single strip TIFF
@@ -95,6 +96,10 @@ class TestModuleChecksumImage(unittest.TestCase):
     def test_single_strip_with_exif_checksum(self):
         """ Tests the checksums for a single strip TIFF file with exif metadata. """
         self._evaluate_checksums("t_one_strip_with_exif")
+
+    def test_single_strip_big_endian_checksum(self):
+        """ Tests the checksums for a single strip big-endian TIFF file """
+        self._evaluate_checksums("t_one_strip_big_endian")
 
 if __name__ == '__main__':
     unittest.main()

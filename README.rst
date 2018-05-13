@@ -97,6 +97,7 @@ optional arguments:
   -h, --help        Show the help message and exit
 
 For example, to compare two TIFF files based on pixel image checksum comparison:
+
   ``tifinity compare --metric checksum-images tiff1 tiff2``
 
 
