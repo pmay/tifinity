@@ -23,6 +23,7 @@ Fixed
 ~~~~~
 * Added numpy dependency to setup.py
 * Improved read handling of TIFFs with tag types beyond those allowed in TIFF v6 specification
+* Corrected TiffFileHandler byteorder support to enable big-endian TIFF file reading
 
 
 [0.1.0] - 2018-04-13
