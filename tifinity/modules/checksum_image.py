@@ -1,7 +1,6 @@
-import hashlib
 import json
-import os
 
+from tifinity.actions.checksum import Checksum
 from tifinity.modules import BaseModule
 from tifinity.parser.tiff import Tiff
 from tifinity.scripts.timing import time_usage
@@ -19,22 +18,14 @@ class ImageFixity(BaseModule):
         m_parser.add_argument("-a", "--alg", dest="algorithm", choices=['md5', 'sha256', 'sha512', 'sha3_256', 'sha3_512'],
                               default='sha256', help="the hashing algorithm to use")
         m_parser.add_argument("--json", dest="json", action="store_true", help="output in json format")
-        m_parser.add_argument("file", help="the TIFF file whose tags to show")
+        m_parser.add_argument("file", help="the TIFF file to generate checksum values for")
 
     # @time_usage
     def process_cli(self, args):
         tiff = Tiff(args.file)
         alg = args.algorithm
 
-        self.hashes["full"] = self._hash_data(tiff.raw_data(), alg)
-
-        image_hashes = []
-        ifd_hashes = []
-        for ifd in tiff.ifds:
-            image_hashes.append(self._hash_data(ifd.img_data, alg))
-            ifd_hashes.append(self._hash_data(ifd.ifd_data, alg))
-        self.hashes["images"] = image_hashes
-        self.hashes["ifds"] = ifd_hashes
+        self.hashes = Checksum.checksum(tiff, alg)
 
         output = self.format_output(args.json)
         print(output)
@@ -50,13 +41,6 @@ class ImageFixity(BaseModule):
                 out += "Image [{id}]:\t{digest}\n".format(id=count, digest=x)
                 count+=1
             return out
-
-    @staticmethod
-    def _hash_data(data, alg="sha256"):
-        """Returns the hash value of the specified data using the specified hashing algorithm"""
-        m = hashlib.new(alg)
-        m.update(data)
-        return m.hexdigest()
 
 
 module = ImageFixity()  # initiate module class when module imported

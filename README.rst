@@ -19,7 +19,7 @@ How to use
 Base usage: ``tifinity [-h] [-v] {module} [module-options]``
 
 module selection:
-  module            One of the modules below
+  :module:            One of the modules below
 
 optional arguments:
   -h, --help        Show the help message and exit
@@ -35,48 +35,71 @@ version - not hugely interesting!
 To be of use for processing TIFFs, a module needs to be specified.
 
 Modules
--------
+=======
 
 Available modules are:
 
 migrate_rgb72
-^^^^^^^^^^^^^
+-------------
 Migrates RGB TIFF images that are encoded as 24 bits-per-channel (i.e. 72 bits per pixel) to 36 bits-per-channel (96 bpi).
 
 Usage: ``tifinity migrate_rgb72 [-h] [-o OUTPUT] path [path...]``
 
 positional arguments:
-  path(s)            a TIFF file or folder(s) containing TIFF files to migrate
+  :path(s):            a TIFF file or folder(s) containing TIFF files to migrate
 
 optional arguments:
   -h, --help        Show the help message and exit
   -o OUTPUT         CSV file to output statistics too
 
 show_tags
-^^^^^^^^^
+---------
 Prints to console the IFD tags of the specified TIFF image.
 
 Usage: ``tifinity show_tags [-h] file``
 
 positional arguments:
-  file              the TIFF file whose IFD tags to show
+  :file:              the TIFF file whose IFD tags to show
 
 optional arguments:
   -h, --help        Show the help message and exit
 
 checksum
-^^^^^^^^
+--------
 Calculates checksum values for the image data in each sub-image of the specified TIFF, as well as the full file.
 
 Usage: ``tifinity checksum [-h] [-a {md5,sha256,sha512,sha3_256,sha3_512}] [--json] file``
 
 positional arguments:
-  file              the TIFF file to generate checksum values for
+  :file:              the TIFF file to generate checksum values for
 
 optional arguments:
   -a                the checksum algorithm to use
   --json            JSON formatted output; otherwise just prints to terminal
   -h, --help        Show the help message and exit
+
+compare
+-------
+Compares two TIFF files against each other using the specified metric.
+
+Usage: ``tifinity compare [-h] -m|--metric {checksum, checksum-images} [--json] tiff1 tiff2``
+
+positional arguments:
+  :tiff1:             the first TIFF file to compare
+  :tiff2:             the second TIFF file to compare
+
+required arguments:
+  -m, --metric      the metric to use to do the comparison. Currently supports full checksumming of the file, or
+                    checksumming of images (within a TIFF) only.
+
+optional arguments:
+  --json            JSON formatted output; otherwise just prints to terminal
+  -h, --help        Show the help message and exit
+
+For example, to compare two TIFF files based on pixel image checksum comparison:
+
+  ``tifinity compare --metric checksum-images tiff1 tiff2``
+
 
 Development
 ===========
@@ -118,7 +141,7 @@ add_subparser(mainparser):
         m_parser.add_argument("-o", dest="output", help="the output folder to output the converted TIFF(s) to.")
 
 process_cli(args):
-
+  This is the function called when a specific tifinity module is instigated.
 
 License
 =======

@@ -4,14 +4,15 @@ Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[Unreleased]
-------------
+[0.2.0] - 2018-05-15
+--------------------
 
 Added
 ~~~~~
 * Unit tests for Checksum module
 * Test resources (hand crafted example TIFF files)
 * read_float and read_double methods in TIFF parser
+* Module to compare two tiffs (currently only via MD5 checksum)
 
 Changed
 ~~~~~~~
@@ -21,6 +22,8 @@ Changed
 Fixed
 ~~~~~
 * Added numpy dependency to setup.py
+* Improved read handling of TIFFs with tag types beyond those allowed in TIFF v6 specification
+* Corrected TiffFileHandler byteorder support to enable big-endian TIFF file reading
 
 
 [0.1.0] - 2018-04-13

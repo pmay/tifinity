@@ -2,7 +2,7 @@ import unittest
 
 
 class TestParser(unittest.TestCase):
-
+    """Tests relating to the TIFF parser"""
 
 
     def test_something(self):
