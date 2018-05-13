@@ -20,7 +20,6 @@ class CompareTiffs(BaseModule):
         m_parser.set_defaults(func=self.process_cli)
 
         m_parser.add_argument("-m", "--metric", dest="metric", choices=self.metric_choices, required=True)
-        #m_parser.add_argument("--imageonly", dest="imageonly", action="store_true", help="only compare image pixel data")
 
         m_parser.add_argument("--json", dest="json", action="store_true", help="output in json format")
 
