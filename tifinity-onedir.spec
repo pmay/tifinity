@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['tifinity\\__main__.py'],
-             pathex=['C:\\Users\\pmay\\Repos\\tifinity'],
+             pathex=['.\\tifinity'],
              binaries=[],
              datas=[],
              hiddenimports=['tifinity.modules'],
@@ -18,12 +18,16 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
+          exclude_binaries=True,
           name='tifinity',
           debug=False,
           strip=False,
           upx=True,
-          runtime_tmpdir=None,
           console=True )
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               name='tifinity')

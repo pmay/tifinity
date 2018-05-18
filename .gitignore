@@ -9,9 +9,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-new-env/
-testenv/
-pypienv/
 build/
 develop-eggs/
 dist/
@@ -66,5 +63,11 @@ target/
 # PyCharm
 .idea
 
-# Virtual Environment
+# Virtual Environments
+new-env/
+pypienv/
+testenv/
 venv/
+venv_32/
+venv_64/
+
