@@ -4,6 +4,17 @@ Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.2.1] - 2018-05-18
+--------------------
+
+Added
+~~~~~
+* Batch script and spec files for building windows executables with PyInstaller
+
+Changed
+~~~~~~~
+* Modified approach to import Tifinity modules to support running as an exe
+
 [0.2.0] - 2018-05-15
 --------------------
 

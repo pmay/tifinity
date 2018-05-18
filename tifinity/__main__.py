@@ -1,28 +1,40 @@
 import argparse
 import importlib
-import os
+import pkgutil
 import sys
 
 from tifinity import __version__
 
-moduledir = "tifinity/modules"
 
+def load_modules(package):
+    """ Imports all valid modules in the specified package, with support for PyInstaller.
+        See: https://github.com/pyinstaller/pyinstaller/issues/1905
+        Adjusted from: https://github.com/webcomics/dosage/blob/master/dosagelib/loader.py
+        """
+    mod = importlib.import_module(package, __name__)
+    prefix = mod.__name__ + "."
+    modules = [m[1] for m in pkgutil.iter_modules(mod.__path__, prefix)]
 
-def load_modules():
-    modules = []
-    possiblemodules = next(os.walk(moduledir))[2]   # os.walk returns (dirpath, dirnames, filenames)
-    for i in possiblemodules:
-        if i == '__init__.py':
-            continue
-        modules.append(importlib.import_module('.'+i[:-3], package='tifinity.modules'))
-    return modules
+    # special handling for PyInstaller
+    importers = map(pkgutil.get_importer, mod.__path__)
+    toc = set()
+    for i in importers:
+        if hasattr(i, 'toc'):
+            toc |= i.toc
+    for elm in toc:
+        if elm.startswith(prefix):
+            modules.append(elm)
+
+    for name in modules:
+        try:
+            yield importlib.import_module(name)
+        except ImportError as msg:
+            print("Could not load module " + name + ":" + msg)
 
 
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-
-    modules = load_modules()
 
     # Process CLI arguments #
     ap = argparse.ArgumentParser(prog="Tifinity",
@@ -31,7 +43,7 @@ def main(args=None):
     moduleparsers = ap.add_subparsers(title='Available Modules', dest='module')
 
     # Set up each module
-    for module in modules:
+    for module in load_modules("tifinity.modules"):
         m = module.module               # initiate the module
         m.add_subparser(moduleparsers)  # add sub-parser to this argparse handler
 
