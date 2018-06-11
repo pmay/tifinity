@@ -13,7 +13,7 @@ class TiffDetails(BaseModule):
         m_parser = mainparser.add_parser(self.cli_name)
         m_parser.set_defaults(func=self.process_cli)
 
-        m_parser.add_argument("-t", "--tag", dest="tag", choices=inv_ifdtag.keys())
+        m_parser.add_argument("-t", "--tag", dest="tag", help="the tag name or number to display")
 
         m_parser.add_argument("file", help="the TIFF file whose tags to show")
 
@@ -22,8 +22,14 @@ class TiffDetails(BaseModule):
 
         for ifd in tiff.ifds:
             if args.tag:
+                try:
+                    tag = int(args.tag)
+                except ValueError:
+                    # it's a string instead
+                    tag = args.tag
+
                 ifd.print_ifd_header()
-                ifd.print_tag(args.tag)
+                ifd.print_tag(tag)
             else:
                 # print all
                 ifd.print_ifd()

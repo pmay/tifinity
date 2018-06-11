@@ -192,8 +192,18 @@ class IFD:
         print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
             self.nextifd) + ")")
 
-    def print_tag(self, tagname):
-        print(self.directories[inv_ifdtag[tagname]].tostring())
+    def print_tag(self, tag):
+        try:
+            dir = self.directories[tag]
+        except KeyError:
+            try:
+                dir = self.directories[inv_ifdtag[tag]]
+            except KeyError:
+                print("Tag Element Not Found")
+                return
+
+        print(dir.tostring())
+
 
     def print_ifd(self):
         print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
