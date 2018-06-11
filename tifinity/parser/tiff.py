@@ -188,6 +188,13 @@ class IFD:
     # def setTagValue(self, tag, value):
     #     self.directories[tag].sot_offset = value
 
+    def print_ifd_header(self):
+        print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
+            self.nextifd) + ")")
+
+    def print_tag(self, tagname):
+        print(self.directories[inv_ifdtag[tagname]].tostring())
+
     def print_ifd(self):
         print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
             self.nextifd) + ")")
