@@ -180,7 +180,11 @@ class IFD:
         return self.directories[inv_ifdtag[tagname]].value
 
     def get_tag_value(self, tag):
-        return self.directories[tag].value
+        try:
+            value = self.directories[tag].value
+        except KeyError:
+            value = None
+        return value
 
     def get_tag_offset(self, tag):
         return self.directories[tag].sot_offset
@@ -262,7 +266,7 @@ class Tiff:
             self.magic = self.tif_file.read_int(2)
             assert (self.magic == 42)
         except (KeyError, AssertionError):
-            raise InvalidTiffError("Incorrect header")
+            raise InvalidTiffError(self.tif_file._filename, "Incorrect header")
 
         # IFD offset
         nextifd_offset = self.tif_file.read_int(4)  # returns offset to first IFD
