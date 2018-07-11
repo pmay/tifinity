@@ -23,6 +23,8 @@ class TiffDetails(BaseModule):
         #       OR
         #        tifinity show_tags -t <tag> -- <file>
         m_parser.add_argument("-t", "--tag", dest="tags", nargs="+", help="the tag name(s) or number(s) to display")
+        m_parser.add_argument("--detail", dest="detail", action="store_true",
+                              help="print all bytes when values exceed 100 characters")
         # m_parser.add_argument("--expand", dest="expand", action="store_true",
         #                       help="prints the actual value not the hex representation")
 
@@ -67,11 +69,12 @@ class TiffDetails(BaseModule):
                                             tiff.ifds[ifd].nextifd,
                                             list(numeric_tags),
                                             image_tags[ifd],
+                                            not args.detail,
                                             args.csv)
             print (output)
 
     @staticmethod
-    def format_output(filename, ifd, offset, numtags, nextifd, req_tags, directories, csvout=False):
+    def format_output(filename, ifd, offset, numtags, nextifd, req_tags, directories, limit_value=False, csvout=False):
         if csvout:
             out = "{0}\t{1}\t".format(filename, ifd)
             for key in sorted(req_tags):
@@ -85,11 +88,11 @@ class TiffDetails(BaseModule):
 
             for tag, directory in directories.items():
                 if directory is not None:
-                    out += directory.tostring()
+                    out += directory.tostring(limit_value)
 
                     if tag==34675:
                         profile = IccProfile(directory.value)
-                        out += profile.tostring()
+                        out += profile.tostring(limit_value)
                 else:
                     out += "[{0}]\t[Not Present]".format(tag)
                 out += "\n"

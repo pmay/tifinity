@@ -82,13 +82,14 @@ class Directory:
     def set_tag_offset(self, offset):
         self.sot_offset = offset  # start of tag offset
 
-    def tostring(self):
+    def tostring(self, limit_value=False):
         tagname = "Unknown"
         if self.tag in ifdtag:
             tagname = ifdtag[self.tag]
         return "[{0}]\t{1:31}\t{2:2}{3}\t{4:6}\t{5}{6}".format(self.tag, tagname, self.type,
                                                             '' if self.type_valid else '*',
-                                                            self.count, self.value,
+                                                            self.count,
+                                                            str(self.value[:100])+'...' if limit_value else self.value,
                                                             '' if self.type_valid else '\t[*Unknown Tag Type]')
 
 
