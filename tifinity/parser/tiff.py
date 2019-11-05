@@ -344,7 +344,7 @@ class Tiff:
             else:
                 # tag type outside TIFF v6 specified ranges
                 # just read next 4 bytes and mark directory as "Unknown tag type"
-                value = self.tif_file.read_int(4)
+                value = self.tif_file.read_ints(4)
                 type_valid = False
 
             # add directory
