@@ -82,13 +82,14 @@ class Directory:
     def set_tag_offset(self, offset):
         self.sot_offset = offset  # start of tag offset
 
-    def tostring(self):
+    def tostring(self, limit_value=False):
         tagname = "Unknown"
         if self.tag in ifdtag:
             tagname = ifdtag[self.tag]
         return "[{0}]\t{1:31}\t{2:2}{3}\t{4:6}\t{5}{6}".format(self.tag, tagname, self.type,
                                                             '' if self.type_valid else '*',
-                                                            self.count, self.value,
+                                                            self.count,
+                                                            str(self.value[:100])+'...' if limit_value else self.value,
                                                             '' if self.type_valid else '\t[*Unknown Tag Type]')
 
 
@@ -180,13 +181,34 @@ class IFD:
         return self.directories[inv_ifdtag[tagname]].value
 
     def get_tag_value(self, tag):
-        return self.directories[tag].value
+        try:
+            value = self.directories[tag].value
+        except KeyError:
+            value = None
+        return value
 
     def get_tag_offset(self, tag):
         return self.directories[tag].sot_offset
 
     # def setTagValue(self, tag, value):
     #     self.directories[tag].sot_offset = value
+
+    def print_ifd_header(self):
+        print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
+            self.nextifd) + ")")
+
+    def print_tag(self, tag):
+        try:
+            dir = self.directories[tag]
+        except KeyError:
+            try:
+                dir = self.directories[inv_ifdtag[tag]]
+            except KeyError:
+                print("Tag Element Not Found")
+                return
+
+        print(dir.tostring())
+
 
     def print_ifd(self):
         print("IFD (Offset: " + str(self.offset) + " | num tags: " + str(self.numtags) + " | next IFD: " + str(
@@ -245,7 +267,7 @@ class Tiff:
             self.magic = self.tif_file.read_int(2)
             assert (self.magic == 42)
         except (KeyError, AssertionError):
-            raise InvalidTiffError("Incorrect header")
+            raise InvalidTiffError(self.tif_file._filename, "Incorrect header")
 
         # IFD offset
         nextifd_offset = self.tif_file.read_int(4)  # returns offset to first IFD
@@ -322,7 +344,7 @@ class Tiff:
             else:
                 # tag type outside TIFF v6 specified ranges
                 # just read next 4 bytes and mark directory as "Unknown tag type"
-                value = self.tif_file.read_int(4)
+                value = self.tif_file.read_ints(4)
                 type_valid = False
 
             # add directory
