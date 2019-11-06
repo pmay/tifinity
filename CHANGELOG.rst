@@ -4,6 +4,19 @@ Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[Unreleased]
+------------
+
+Added
+~~~~~
+* ICC Parser, handling and printing
+* Initial perceptual difference engine
+
+Fixed
+~~~~~
+* Fixed a bug in the Tiff parser when reading a tag type that is outside the TIFF v6 spec range
+
+
 [0.2.1] - 2018-05-18
 --------------------
 
