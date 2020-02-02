@@ -62,7 +62,12 @@ ifdtag = {
     320: "ColorMap",
     338: "ExtraSamples",
     339: "SampleFormat",  # ext; TIFF 6.0 Section 19
+    700: "XMP",
     33432: "Copyright",
+    33723: "IPTC",
+    34377: "Photoshop",
+    34665: "EXIF_IFD",
+    34675: "ICC_Profile",
     -1: "UNKNOWN"
 }
 
@@ -87,10 +92,13 @@ class Directory:
         if self.tag in ifdtag:
             tagname = ifdtag[self.tag]
         val_to_print = self.value
+        if self.type == 2:
+            val_to_print = ''.join(chr(i) for i in val_to_print)
+
         if limit_value:
-            val_to_print = str(self.value[:100])
+            val_to_print = str(val_to_print[:100]) #str(self.value[:100])
             if len(self.value)>100:
-                val_to_print+= '...'
+                val_to_print += '...'
         return "[{0}]\t{1:31}\t{2:2}{3}\t{4:6}\t{5}{6}".format(self.tag, tagname, self.type,
                                                             '' if self.type_valid else '*',
                                                             self.count,

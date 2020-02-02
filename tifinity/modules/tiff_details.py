@@ -86,13 +86,11 @@ class TiffDetails(BaseModule):
             out += "IFD (Offset: " + str(offset) + " | num tags: " + str(numtags) + " | next IFD: " + str(nextifd)\
                    + ")\n"
 
+            #out += "{0}\t{1:31}\t{2:4}\t{3:6}\t{4}\n".format("TAG #", "TAG NAME", "TYPE", "COUNT", "VALUE")
+
             for tag, directory in directories.items():
                 if directory is not None:
                     out += directory.tostring(limit_value)
-
-                    if tag==271 or tag==272:
-                        chrval = ''.join(chr(i) for i in directory.value)
-                        out += "\n\t\t\t\t\t\t\t"+chrval
 
                     if tag==34675:
                         profile = IccProfile(directory.value)
