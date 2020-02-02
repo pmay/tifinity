@@ -86,10 +86,15 @@ class Directory:
         tagname = "Unknown"
         if self.tag in ifdtag:
             tagname = ifdtag[self.tag]
+        val_to_print = self.value
+        if limit_value:
+            val_to_print = str(self.value[:100])
+            if len(self.value)>100:
+                val_to_print+= '...'
         return "[{0}]\t{1:31}\t{2:2}{3}\t{4:6}\t{5}{6}".format(self.tag, tagname, self.type,
                                                             '' if self.type_valid else '*',
                                                             self.count,
-                                                            str(self.value[:100])+'...' if limit_value else self.value,
+                                                            val_to_print,
                                                             '' if self.type_valid else '\t[*Unknown Tag Type]')
 
 

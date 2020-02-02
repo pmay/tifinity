@@ -90,6 +90,10 @@ class TiffDetails(BaseModule):
                 if directory is not None:
                     out += directory.tostring(limit_value)
 
+                    if tag==271 or tag==272:
+                        chrval = ''.join(chr(i) for i in directory.value)
+                        out += "\n\t\t\t\t\t\t\t"+chrval
+
                     if tag==34675:
                         profile = IccProfile(directory.value)
                         out += profile.tostring(limit_value)

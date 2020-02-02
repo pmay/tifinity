@@ -12,6 +12,10 @@ Added
 * ICC Parser, handling and printing
 * Initial perceptual difference engine
 
+Changed
+~~~~~~~
+* Improved tag printing for long-length tag values
+
 Fixed
 ~~~~~
 * Fixed a bug in the Tiff parser when reading a tag type that is outside the TIFF v6 spec range
