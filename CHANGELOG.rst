@@ -4,6 +4,24 @@ Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.3.0] - 2020-02-04
+------------
+
+Added
+~~~~~
+* ICC Parser, handling and printing
+* Additional tag names for XMP, IPTC, Photoshop, EXIF, and ICC Profile
+
+Changed
+~~~~~~~
+* Improved tag printing for long-length tag values
+
+Fixed
+~~~~~
+* Fixed a bug in the Tiff parser when reading a tag type that is outside the TIFF v6 spec range
+* ASCII tags now print out as characters
+
+
 [0.2.1] - 2018-05-18
 --------------------
 
