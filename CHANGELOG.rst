@@ -4,13 +4,13 @@ Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[Unreleased]
+[0.3.0] - 2020-02-04
 ------------
 
 Added
 ~~~~~
 * ICC Parser, handling and printing
-* Initial perceptual difference engine
+* Additional tag names for XMP, IPTC, Photoshop, EXIF, and ICC Profile
 
 Changed
 ~~~~~~~
