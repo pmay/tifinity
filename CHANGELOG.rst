@@ -19,6 +19,7 @@ Changed
 Fixed
 ~~~~~
 * Fixed a bug in the Tiff parser when reading a tag type that is outside the TIFF v6 spec range
+* ASCII tags now print out as characters
 
 
 [0.2.1] - 2018-05-18
